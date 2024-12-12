@@ -9,6 +9,7 @@ mod day_06;
 mod day_07;
 mod grid;
 mod util;
+mod day_08;
 
 fn main() {
     let christmas_past = false;
@@ -27,6 +28,8 @@ fn main() {
         day_06::part_two();
         day_07::part_one();
         day_07::part_two();
+        day_08::part_one();
+        day_08::part_two();
     }
 
 }

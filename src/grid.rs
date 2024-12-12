@@ -1,10 +1,12 @@
 use std::cmp;
+use std::collections::HashSet;
+use std::hash::Hash;
 
 pub struct Grid<T> {
     data: Vec<Vec<T>>,
 }
 
-impl<T: Clone> Grid<T> {
+impl<T: Clone + Eq + Hash> Grid<T> {
     pub fn new(width: usize, height: usize, default_value: T) -> Self {
         let data = vec![vec![default_value; width]; height];
         Grid { data }
@@ -39,7 +41,7 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    pub fn find(&self, predicate: fn(&T) -> bool) -> Option<Point> {
+    pub fn find_first(&self, predicate: fn(&T) -> bool) -> Option<Point> {
         for y in 0..self.get_height() {
             for x in 0..self.get_width() {
                 if predicate(&self.data[x][y]) {
@@ -48,6 +50,33 @@ impl<T: Clone> Grid<T> {
             }
         }
         None
+    }
+
+    pub fn find_all<P>(&self, predicate: P) -> Vec<Point>
+    where
+        P: Fn(&T) -> bool,
+    {
+        let mut result: Vec<Point> = Vec::new();
+        for y in 0..self.get_height() {
+            for x in 0..self.get_width() {
+                if predicate(&self.data[x][y]) {
+                    result.push(Point{x, y});
+                }
+            }
+        }
+        result
+    }
+
+    pub fn distinct(&self) -> HashSet<T> {
+        let mut result: HashSet<T> = HashSet::new();
+        for y in 0..self.get_height() {
+            for x in 0..self.get_width() {
+                if !result.contains(&self.data[x][y]) {
+                    result.insert(self.data[x][y].clone());
+                }
+            }
+        }
+        result
     }
 
     pub fn translate(&self, origin: &Point, translation: &Translation, wrap: bool) -> Option<Point> {
@@ -73,7 +102,10 @@ impl<T: Clone> Grid<T> {
         None
     }
 
-    pub fn print(&self, print: fn(&T) -> String) {
+    pub fn print<P>(&self, print: P)
+    where
+        P: Fn(&T) -> String,
+    {
         for y in 0..self.get_height() {
             for x in 0..self.get_width() {
                 print!("{}", print(&self.data[x][y]));
@@ -92,8 +124,22 @@ impl Grid<char> {
     }
 }
 
+/// Negates the given translation i.e. mirroring
 pub fn mirror(translation: &Translation) -> Translation {
     Translation{x: -translation.x, y: -translation.y}
+}
+
+/// Calculates Manhattan Distance
+/// Result is based on the viewpoint of the origin
+pub fn calculate_distance(origin: &Point, target: &Point) -> Translation {
+    let d_x = target.x as i32 - origin.x as i32;
+    let d_y = target.y as i32 - origin.y as i32;
+    Translation{x: d_x, y: d_y}
+}
+
+/// Makes a translation absolute (positive)
+pub fn make_absolute(translation: &Translation) -> Translation {
+    Translation{x: translation.x.abs(), y: translation.y.abs()}
 }
 
 pub fn get_grid_size(input: &String) -> Dimension {

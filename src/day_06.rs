@@ -6,7 +6,7 @@ pub fn part_one() {
     let input = util::read(2024, 6, false);
     let mut grid = Grid::from_string(&input);
     // grid.print(|val| val.to_string());
-    let mut guard = grid.find(|val| {
+    let mut guard = grid.find_first(|val| {
         *val == '^' || *val == '>' || *val == '<' || *val == 'v'
     }).unwrap();
 
@@ -47,7 +47,7 @@ pub fn part_two() {
     let input = util::read(2024, 6, false);
     let mut grid = Grid::from_string(&input);
     // grid.print(|val| val.to_string());
-    let start_guard = grid.find(|val| {
+    let start_guard = grid.find_first(|val| {
         *val == '^' || *val == '>' || *val == '<' || *val == 'v'
     }).unwrap();
 
